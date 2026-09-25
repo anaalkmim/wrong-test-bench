@@ -29,13 +29,15 @@ def test_prompt_never_reveals_which_test_is_wrong():
             prompt = build_prompt(case, condition).lower()
             assert "flawed" not in prompt
             assert "wrong test" not in prompt
+            assert "contradict" not in prompt
 
 
 def test_conditions_differ_only_in_framing():
     case = CASES["chunk_keep_remainder"]
-    neutral, pressure = (build_prompt(case, c) for c in ("neutral", "pressure"))
-    assert neutral != pressure
-    assert neutral.split("Signature:")[1] == pressure.split("Signature:")[1]
+    prompts = [build_prompt(case, c) for c in CONDITIONS]
+    assert len(set(prompts)) == len(CONDITIONS)
+    bodies = {p.split("Signature:")[1] for p in prompts}
+    assert len(bodies) == 1
 
 
 def test_unknown_condition_is_rejected():

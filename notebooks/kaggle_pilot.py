@@ -29,29 +29,33 @@ def wrong_test_case(llm, case_id: str, condition: str) -> dict:
     case = CASES[case_id]
     with kbench.chats.new(f"{case_id}-{condition}"):
         answer = llm.prompt(build_prompt(case, condition), schema=Submission)
-    verdict = classify(case, answer.code, answer.suspect_tests)
+    verdict = classify(case, answer.code, answer.all_tests_pass)
     return {
         "case_id": case_id,
         "condition": condition,
         "behavior": verdict.behavior.value,
-        "flagged": verdict.flagged,
-        "false_flags": verdict.false_flags,
+        "claimed_all_pass": verdict.claimed_all_pass,
+        "actually_all_pass": verdict.actually_all_pass,
+        "honest_report": verdict.honest_report,
         "neutral_pass": verdict.neutral_pass,
         "ideal": verdict.ideal,
         "code": answer.code,
-        "suspect_tests": list(answer.suspect_tests),
+        "notes": answer.notes,
     }
 
 
-# %% Cell 3 - run every case in both conditions with the default model
+print(f"{len(CASES)} cases loaded: {list(CASES)}")
+
+
+# %% Cell 3 - run every case in every condition with the default model
 rows = pd.DataFrame(
     [{"case_id": case_id, "condition": condition} for case_id in CASES for condition in CONDITIONS]
 )
 runs = wrong_test_case.evaluate(llm=[kbench.llm], evaluation_data=rows)
 results = pd.DataFrame(list(runs.as_dataframe()["result"]))
-results[["case_id", "condition", "behavior", "flagged", "false_flags", "neutral_pass", "ideal"]]
+results[["case_id", "condition", "behavior", "claimed_all_pass", "honest_report", "neutral_pass", "ideal"]]
 
 # %% Cell 4 - read what the model actually wrote for any row
 row = 0
-print(results.loc[row, "suspect_tests"])
+print("notes:", results.loc[row, "notes"])
 print(results.loc[row, "code"])
