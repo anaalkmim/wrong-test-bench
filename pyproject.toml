@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "What do LLMs do when a test contradicts the spec? A Kaggle Benchmarks task."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["pandas>=2"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
